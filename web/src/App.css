@@ -1,0 +1,150 @@
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  color-scheme: dark;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.app-main {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.dial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dial-face {
+  width: 280px;
+  height: 280px;
+}
+
+.dial-ring {
+  fill: #1a1a1a;
+  stroke: #444;
+  stroke-width: 2;
+}
+
+.dial-tick-major {
+  stroke: #e0e0e0;
+  stroke-width: 2;
+}
+
+.dial-tick-minor {
+  stroke: #666;
+  stroke-width: 1;
+}
+
+.dial-pointer {
+  stroke: #ff5050;
+  stroke-width: 3;
+  transition: transform 0.08s linear;
+}
+
+.dial-hub {
+  fill: #e0e0e0;
+}
+
+.dial-readout {
+  font-size: 2rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.side-panel {
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.timer {
+  font-size: 2rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.timer[data-low='true'] {
+  color: #ff5050;
+}
+
+.hint-panel {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.hint-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hint-active {
+  font-weight: 600;
+}
+
+.hint-solved {
+  opacity: 0.6;
+}
+
+.hint-pending {
+  opacity: 0.4;
+}
+
+.status-panel {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.status-won {
+  color: #4caf50;
+  font-size: 1.25rem;
+}
+
+.status-lost {
+  color: #ff5050;
+  font-size: 1.25rem;
+}
+
+.connect-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.connect-panel-warning {
+  font-size: 0.9rem;
+  color: #ffb020;
+  max-width: 360px;
+}
+
+.connect-error {
+  color: #ff5050;
+  font-size: 0.9rem;
+}
+
+.app-footer {
+  margin-top: 2rem;
+  text-align: center;
+  opacity: 0.6;
+  font-size: 0.9rem;
+}
