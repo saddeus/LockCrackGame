@@ -1,10 +1,13 @@
-import { DIAL_SIZE } from '../game/combo'
+import { DIAL_SIZE, DWELL_MS } from '../game/combo'
 
 interface DialProps {
   position: number
+  dwelling: boolean
 }
 
-export function Dial({ position }: DialProps) {
+const DWELL_RING_CIRCUMFERENCE = 2 * Math.PI * 95
+
+export function Dial({ position, dwelling }: DialProps) {
   const angle = (position / DIAL_SIZE) * 360
   const ticks = Array.from({ length: DIAL_SIZE }, (_, i) => i)
 
@@ -12,6 +15,17 @@ export function Dial({ position }: DialProps) {
     <div className="dial">
       <svg viewBox="0 0 200 200" className="dial-face">
         <circle cx="100" cy="100" r="95" className="dial-ring" />
+        {dwelling && (
+          <circle
+            key={position}
+            cx="100"
+            cy="100"
+            r="95"
+            className="dial-dwell-ring"
+            strokeDasharray={DWELL_RING_CIRCUMFERENCE}
+            style={{ animationDuration: `${DWELL_MS}ms` }}
+          />
+        )}
         {ticks.map((i) => {
           const tickAngle = (i / DIAL_SIZE) * 360
           const major = i % 10 === 0

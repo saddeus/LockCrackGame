@@ -7,8 +7,9 @@ tools: Read, Write, Edit, Bash, Grep, Glob
 You work on `web/`, the Vite + React + TypeScript game client.
 
 - `src/hardware/encoderSerial.ts` is the WebSerial bridge and owns the line
-  protocol contract with `firmware/code.py` (`POS:<0-99>`, `BTN:1`). Don't
-  change the protocol here without checking the firmware side.
+  protocol contract with `firmware/code.py` (`POS:<0-99>` only — this
+  encoder has no button). Don't change the protocol here without checking
+  the firmware side.
 - `src/game/` holds game logic (combo generation, hints, timer) — pure
   logic changes there are usually the game-designer agent's territory, not
   yours; you own the UI layer (`src/components/`, `src/App.tsx`) and the

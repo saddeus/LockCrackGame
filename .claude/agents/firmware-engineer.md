@@ -5,14 +5,18 @@ tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
 You work on `firmware/code.py`, the CircuitPython firmware running on the
-Adafruit ItsyBitsy that reads the 100-stop CNC rotary encoder and push
-button.
+Adafruit ItsyBitsy M4 that reads the 100-stop CNC rotary encoder (Adafruit
+#5734 — no push button; "confirm" is a dwell timeout handled in the web
+app, not in firmware).
 
 - The line protocol it speaks over USB serial is documented at the top of
-  `firmware/code.py` and in `firmware/README.md`: `POS:<0-99>\n` and
-  `BTN:1\n`. Any change to this protocol must be mirrored in
+  `firmware/code.py` and in `firmware/README.md`: `POS:<0-99>\n` only. Any
+  change to this protocol must be mirrored in
   `web/src/hardware/encoderSerial.ts` on the web side — check that file
   before changing message formats.
+- Wiring is 4 wires: encoder VCC→3V, GND→GND, A→A1, B→A2. See
+  `firmware/README.md` for the full breadboard walkthrough and why no
+  external pull-ups are needed.
 - `COUNTS_PER_DETENT` assumes 4 quadrature counts per detent; if a specific
   encoder behaves differently, that's the constant to adjust rather than
   restructuring the read loop.

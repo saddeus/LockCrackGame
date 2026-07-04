@@ -14,7 +14,8 @@ function formatTime(seconds: number): string {
 
 function App() {
   const [encoder] = useState(() => new EncoderSerial())
-  const { stages, stageIndex, dialPosition, timeLeft, status, start } = useLockGame(encoder)
+  const { stages, stageIndex, dialPosition, timeLeft, status, dwelling, start } =
+    useLockGame(encoder)
 
   return (
     <div className="app">
@@ -24,7 +25,7 @@ function App() {
       </header>
 
       <main className="app-main">
-        <Dial position={dialPosition} />
+        <Dial position={dialPosition} dwelling={dwelling} />
 
         <div className="side-panel">
           <div className="timer" data-low={timeLeft <= 30}>
@@ -43,7 +44,10 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <p>Turn the dial with the physical encoder, or use ← → and Enter for testing.</p>
+        <p>
+          Turn the dial and hold still to confirm a digit, or use ← → (and Enter to confirm
+          instantly) for testing without hardware.
+        </p>
       </footer>
     </div>
   )
