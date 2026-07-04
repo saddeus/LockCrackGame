@@ -3,11 +3,12 @@ import { DIAL_SIZE, DWELL_MS } from '../game/combo'
 interface DialProps {
   position: number
   dwelling: boolean
+  lastResult?: 'correct' | 'wrong' | null
 }
 
 const DWELL_RING_CIRCUMFERENCE = 2 * Math.PI * 95
 
-export function Dial({ position, dwelling }: DialProps) {
+export function Dial({ position, dwelling, lastResult }: DialProps) {
   const angle = (position / DIAL_SIZE) * 360
   const ticks = Array.from({ length: DIAL_SIZE }, (_, i) => i)
 
@@ -24,6 +25,16 @@ export function Dial({ position, dwelling }: DialProps) {
             className="dial-dwell-ring"
             strokeDasharray={DWELL_RING_CIRCUMFERENCE}
             style={{ animationDuration: `${DWELL_MS}ms` }}
+          />
+        )}
+        {lastResult && (
+          <circle
+            cx="100"
+            cy="100"
+            r="95"
+            className={
+              lastResult === 'correct' ? 'dial-flash-ring dial-flash-correct' : 'dial-flash-ring dial-flash-wrong'
+            }
           />
         )}
         {ticks.map((i) => {

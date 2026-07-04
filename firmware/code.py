@@ -23,9 +23,13 @@ import time
 import board
 import rotaryio
 
-# This encoder reports 4 quadrature counts per detent (standard for
-# incremental encoders read via rotaryio). Adjust if yours differs.
-COUNTS_PER_DETENT = 4
+# Raw rotaryio counts per detent click. 4 is the "standard" quadrature
+# assumption, but this specific encoder reports 1 count per detent, so this
+# needs to be 1 for a 1:1 click-to-number feel. If it ever drifts (skips or
+# needs multiple clicks again), check the raw count directly: log
+# `encoder.position` before dividing and count how much it changes for one
+# physical click.
+COUNTS_PER_DETENT = 1
 DIAL_SIZE = 100
 
 encoder = rotaryio.IncrementalEncoder(board.A1, board.A2)
