@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { EncoderSerial } from '../hardware/encoderSerial'
-import { DIAL_SIZE, ROUND_SECONDS, generateRound } from './combo'
+import { DIAL_SIZE, DWELL_MS, ROUND_SECONDS, generateRound } from './combo'
 import type { ComboStage, GameStatus } from './types'
 
 const wrap = (value: number): number => ((value % DIAL_SIZE) + DIAL_SIZE) % DIAL_SIZE
@@ -11,6 +11,7 @@ export function useLockGame(encoder: EncoderSerial) {
   const [dialPosition, setDialPosition] = useState(0)
   const [timeLeft, setTimeLeft] = useState(ROUND_SECONDS)
   const [status, setStatus] = useState<GameStatus>('idle')
+  const [dwelling, setDwelling] = useState(false)
   const statusRef = useRef(status)
   statusRef.current = status
 
@@ -54,18 +55,31 @@ export function useLockGame(encoder: EncoderSerial) {
     })
   }, [stageIndex, dialPosition])
 
-  // Hardware input: dial position + confirm button.
+  // Hardware input: the encoder has no confirm button, so this only
+  // updates the dial position — confirmation is the dwell timer below.
   useEffect(() => {
     return encoder.subscribe((event) => {
-      if (event.type === 'position') {
-        setDialPosition(wrap(event.value))
-      } else if (event.type === 'button') {
-        confirmDigit()
-      }
+      setDialPosition(wrap(event.value))
     })
-  }, [encoder, confirmDigit])
+  }, [encoder])
 
-  // Keyboard fallback for testing without hardware attached.
+  // Dwell-time auto-confirm: once the dial has sat still for DWELL_MS,
+  // attempt to confirm whatever value it's resting on.
+  useEffect(() => {
+    if (status !== 'playing') {
+      setDwelling(false)
+      return
+    }
+    setDwelling(true)
+    const id = setTimeout(() => {
+      setDwelling(false)
+      confirmDigit()
+    }, DWELL_MS)
+    return () => clearTimeout(id)
+  }, [dialPosition, status, confirmDigit])
+
+  // Keyboard fallback for testing without hardware attached. Enter forces
+  // an immediate confirm instead of waiting out the dwell timer.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') setDialPosition((p) => wrap(p + 1))
@@ -76,5 +90,5 @@ export function useLockGame(encoder: EncoderSerial) {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [confirmDigit])
 
-  return { stages, stageIndex, dialPosition, timeLeft, status, start }
+  return { stages, stageIndex, dialPosition, timeLeft, status, dwelling, start }
 }

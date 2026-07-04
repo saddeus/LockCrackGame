@@ -2,11 +2,12 @@
 //
 // Firmware protocol (see firmware/code.py), one line per event over USB CDC:
 //   POS:<0-99>\n   absolute dial position, sent whenever it changes
-//   BTN:1\n        push-button press (confirm current digit)
+//
+// There's no physical confirm button on this encoder — "confirm" is a
+// dwell-time timeout handled in web/src/game/useLockGame.ts once the dial
+// stops moving.
 
-export type EncoderEvent =
-  | { type: 'position'; value: number }
-  | { type: 'button' }
+export type EncoderEvent = { type: 'position'; value: number }
 
 export type EncoderListener = (event: EncoderEvent) => void
 
@@ -84,8 +85,6 @@ export class EncoderSerial {
       if (Number.isFinite(value)) {
         this.emit({ type: 'position', value })
       }
-    } else if (key === 'BTN') {
-      this.emit({ type: 'button' })
     }
   }
 

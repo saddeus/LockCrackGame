@@ -9,10 +9,10 @@ a timer — to find the combo.
 ## Architecture
 
 ```
-CNC rotary encoder (100 detents + push button)
-        |  quadrature A/B + button pin
-Adafruit ItsyBitsy (CircuitPython, firmware/code.py)
-        |  USB serial, line protocol: POS:<0-99>\n  BTN:1\n
+CNC rotary encoder (Adafruit #5734, 100 detents, no button)
+        |  quadrature A/B
+Adafruit ItsyBitsy M4 (CircuitPython, firmware/code.py)
+        |  USB serial, line protocol: POS:<0-99>\n
 Browser (WebSerial API, web/src/hardware/encoderSerial.ts)
         |
 React game state (web/src/game/useLockGame.ts)
@@ -22,8 +22,13 @@ Virtual lock UI (web/src/components/Dial.tsx + HintPanel.tsx)
 
 WebSerial only works in Chromium browsers (Chrome/Edge), which is
 acceptable since this targets desktop play with the physical peripheral
-attached. A keyboard fallback (←/→ turns the dial, Enter confirms) works in
-any browser for development/testing without hardware.
+attached. A keyboard fallback (←/→ turns the dial, Enter forces an instant
+confirm) works in any browser for development/testing without hardware.
+
+This encoder has no physical confirm button, so "confirm" is a dwell-time
+timeout (`DWELL_MS` in `web/src/game/combo.ts`): once the dial sits still
+for ~1s, whatever value it's resting on is attempted against the current
+stage's target.
 
 ## Repo layout
 
@@ -44,9 +49,9 @@ any browser for development/testing without hardware.
 Each round is `STAGE_COUNT` (3) stages; each stage has a target number
 0-99 and a hint of kind `math` (an arithmetic problem that evaluates to the
 target) or `clue` (a text riddle solving to the target). The player dials
-in the number and presses confirm (physical button or Enter); a correct
-digit advances to the next stage, all three within `ROUND_SECONDS` (180s)
-wins.
+in the number and holds it (dwell-time auto-confirm) or presses Enter; a
+correct digit advances to the next stage, all three within `ROUND_SECONDS`
+(180s) wins.
 
 A `scene` hint kind (visual/interactive clues placed in a game
 environment, e.g. counting objects or reading a prop) is planned but not

@@ -38,6 +38,26 @@
   stroke-width: 2;
 }
 
+.dial-dwell-ring {
+  fill: none;
+  stroke: #4caf50;
+  stroke-width: 3;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 100px 100px;
+  animation: dial-dwell-fill linear forwards;
+}
+
+@keyframes dial-dwell-fill {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    /* circumference of the r=95 dial ring (2 * pi * 95) */
+    stroke-dashoffset: 596.9;
+  }
+}
+
 .dial-tick-major {
   stroke: #e0e0e0;
   stroke-width: 2;
