@@ -12,12 +12,17 @@ hardware bridge.
   a game environment) is planned but not yet built — if asked to design
   scene-based hints, that's a larger feature needing its own UI/interaction
   model, not a quick addition to `hints.ts`.
-- `hints.ts` generates math and clue hints from a target number 0-99;
+- `hints.ts` generates math and clue hints from a target number 0-99,
+  drawing from per-`Difficulty` (`easy | medium | hard`) template pools;
   `combo.ts` builds a full round (`STAGE_COUNT` stages, `ROUND_SECONDS`
-  timer); `useLockGame.ts` is the state machine (don't change without
-  coordinating with web-engineer, since it's consumed directly by
-  `App.tsx`).
+  timer, `PENALTY_SECONDS` for wrong guesses); `useLockGame.ts` is the
+  state machine (don't change without coordinating with web-engineer,
+  since it's consumed directly by `App.tsx`).
 - When adding a new hint template, make sure it's solvable unambiguously
-  for every target in range 0-99 (see how `CLUE_TEMPLATES` uses an
-  `eligible()` check to avoid ambiguous templates like halving odd
-  numbers) — don't just assume a formula works for all inputs.
+  for every target in range 0-99 (see how `CLUE_TEMPLATES`/`MATH_TEMPLATES`
+  use an `eligible()` check to avoid ambiguous templates like halving odd
+  numbers) — don't just assume a formula works for all inputs. Keep
+  medium's pool as the unchanged baseline; add new difficulty to easy/hard.
+- Difficulty is meant to only change math complexity (not round length or
+  stage count) — that was a deliberate scope decision, flag it if asked to
+  change timer/stage count per difficulty rather than just doing it.
