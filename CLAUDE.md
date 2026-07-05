@@ -1,10 +1,19 @@
 # Lock Crack Game
 
-A web-based combination-lock puzzle game controlled by a physical 100-stop
-CNC rotary encoder wired to an Adafruit ItsyBitsy (CircuitPython). The
-player turns the real dial to set numbers on a virtual lock on screen,
-using hints scattered in the scene, math problems, and other clues — under
-a timer — to find the combo.
+A combination-lock puzzle game controlled by a physical 100-stop CNC
+rotary encoder. The player turns the real dial to set numbers on a
+virtual lock, using hints scattered in the scene, math problems, and
+other clues — under a timer — to find the combo.
+
+There are two builds of this game in the repo:
+- The **web version** (`web/` + `firmware/`, on `dev`/`main`) — an
+  Adafruit ItsyBitsy M4 streams the encoder over WebSerial to a React app
+  with a Supabase-backed leaderboard. Documented in most of this file.
+- The **standalone hardware version** (`standalone/`, on the
+  `standalone-hardware` branch) — no browser or computer at all; an
+  Adafruit RP2040 Prop-Maker Feather runs the entire game, with an OLED,
+  speaker, buttons, LEDs, and a local on-device leaderboard. See its own
+  `standalone/README.md` and the section below.
 
 ## Architecture
 
@@ -45,8 +54,11 @@ stage's target.
     (`submitScore`, `fetchScores`) for the shared leaderboard.
 - `firmware/` — CircuitPython firmware for the ItsyBitsy (`code.py`) plus
   wiring/setup notes (`README.md`).
-- `.github/workflows/` — `ci.yml` (typecheck+build on PRs), `deploy.yml`
-  (builds and publishes `web/` to GitHub Pages on push to `main`).
+- `standalone/` — CircuitPython for the standalone hardware version (see
+  below), on the `standalone-hardware` branch.
+- `.github/workflows/` — `ci.yml` (typecheck+build on PRs, plus a
+  `standalone/` syntax check), `deploy.yml` (builds and publishes `web/`
+  to GitHub Pages on push to `main`).
 
 ## Game design
 
@@ -111,6 +123,38 @@ lives in a Supabase Postgres project instead of a custom server:
   variables, not secrets, since the anon key is meant to be public) and
   wired into `.github/workflows/deploy.yml`'s build step.
 
+## Standalone hardware version (`standalone/` branch)
+
+Fully self-contained: no web client, no cloud. Runs on an Adafruit RP2040
+Prop-Maker Feather (built-in MAX98357 I2S amp, STEMMA QT I2C, 21 GPIO)
+with the same rotary encoder, plus a 128x64 SSD1306 OLED, a speaker, two
+buttons (Confirm, Back/Menu), and two indicator LEDs.
+
+- `standalone/game/` is a **direct port** of `web/src/game/{types,hints,
+  combo}.ts` — same formulas, same per-difficulty template pools, same
+  `PENALTY_SECONDS`. Keep both in sync if either changes.
+- Real buttons replace the web version's dwell-timeout confirm — no
+  `DWELL_MS` equivalent, and no accidental-penalty tradeoff as a result.
+- **Calibration**: the encoder has no absolute position reference, so
+  every power-on starts with a `calibrate` state (turn to the knob's top
+  notch, press Confirm) before the menu — see `hardware/encoder.py`'s
+  `calibrate()`/`offset`.
+- Menu/difficulty select and arcade-style 3-character initials entry are
+  both dial-driven (turn to cycle options/letters, Confirm to pick) —
+  no separate controls needed.
+- Leaderboard is **local**: `leaderboard.py` keeps a top-10-per-difficulty
+  JSON file on the board's flash (no WiFi hardware, no cloud). Deliberately
+  no per-question detail drill-down like the web version — kept minimal
+  for the small screen and "compact like an old arcade" ask.
+- `boot.py` remounts storage so the running game can write the leaderboard
+  file — holding Back/Menu at power-on skips that and restores normal
+  computer write-access for editing code. See `standalone/README.md`.
+- `pins.py` centralizes every GPIO assignment — nothing else references
+  `board.*` directly.
+- Game logic (`game/`) and `leaderboard.py` have no hardware imports, so
+  they can be exercised directly with plain `python3` (no CircuitPython
+  needed) — the fastest way to verify a logic change before flashing.
+
 ## Branch & deploy pipeline
 
 - `dev` is the default branch and where day-to-day work happens.
@@ -131,7 +175,7 @@ to the right specialist automatically based on task description:
 
 | Task type | Agent | Scope |
 |---|---|---|
-| Encoder wiring, CircuitPython, serial protocol on the firmware side | `firmware-engineer` | `firmware/` |
+| CircuitPython/hardware work on either build — encoder, buttons, LEDs, OLED, sound, serial protocol | `firmware-engineer` | `firmware/`, `standalone/` |
 | React UI, dial rendering, WebSerial integration | `web-engineer` | `web/src/components/`, `web/src/hardware/` |
 | Hint/combo/puzzle design and balancing | `game-designer` | `web/src/game/` |
 | Git branching, GitHub Actions, Pages deploy, repo admin | `devops` | `.github/`, repo settings |
@@ -164,3 +208,7 @@ npm run build           # production build (matches CI/deploy)
 ```
 
 Firmware install steps: see `firmware/README.md`.
+
+Standalone version: `find standalone -name '*.py' -print0 | xargs -0
+python3 -m py_compile` (syntax check, matches CI) — flashing steps in
+`standalone/README.md`.
