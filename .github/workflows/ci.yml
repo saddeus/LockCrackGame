@@ -22,3 +22,13 @@ jobs:
       - run: npm ci
       - run: npx tsc -b --noEmit
       - run: npm run build
+
+  standalone-syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # CircuitPython-only imports (board, digitalio, rotaryio, etc.)
+      # aren't installed here — py_compile only parses syntax, it
+      # doesn't need those modules to resolve, so this still catches
+      # typos before anything gets flashed to real hardware.
+      - run: find standalone -name '*.py' -print0 | xargs -0 python3 -m py_compile
